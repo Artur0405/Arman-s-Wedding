@@ -129,20 +129,67 @@
 
 
   /* -------------------- RSVP FORM -------------------- */
-  const form = $('#rsvpForm');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = form.querySelector('input[name="name"]');
-      if (!name.value.trim()) {
-        name.focus();
-        name.style.borderColor = '#ffb89c';
-        setTimeout(() => name.style.borderColor = '', 1400);
-        return;
-      }
+  const form = document.querySelector('#rsvpForm');
+
+  const GOOGLE_SCRIPT_URL = 'AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA';
+
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = form.querySelector('input[name="name"]');
+    const count = form.querySelector('input[name="count"]');
+    const attend = form.querySelector('input[name="attend"]:checked');
+
+    const sides = [...form.querySelectorAll('input[name="side"]:checked')]
+      .map(item => item.value)
+      .join(', ');
+
+    if (!name.value.trim()) {
+      name.focus();
+      name.style.borderColor = '#ffb89c';
+      setTimeout(() => name.style.borderColor = '', 1400);
+      return;
+    }
+
+    if (!count.value.trim() || Number(count.value) < 1) {
+      count.focus();
+      count.style.borderColor = '#ffb89c';
+      setTimeout(() => count.style.borderColor = '', 1400);
+      return;
+    }
+
+    if (!attend) {
+      alert('Խնդրում ենք ընտրել՝ կկարողանա՞ք ներկա գտնվել');
+      return;
+    }
+
+    const data = {
+      name: name.value.trim(),
+      count: count.value.trim(),
+      attend: attend.value,
+      side: sides || 'Չի նշվել'
+    };
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
       form.classList.add('is-sent');
-      // Frontend-only: keep the fields disabled briefly after sending.
-      [...form.elements].forEach((el) => { el.disabled = true; });
-    });
-  }
+
+      [...form.elements].forEach((el) => {
+        el.disabled = true;
+      });
+
+    } catch (error) {
+      alert('Սխալ տեղի ունեցավ։ Խնդրում ենք փորձել կրկին։');
+    }
+  });
+}
 })();
