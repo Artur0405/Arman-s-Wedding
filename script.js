@@ -131,7 +131,7 @@
   /* -------------------- RSVP FORM -------------------- */
   const form = document.querySelector('#rsvpForm');
 
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA/exec';
 
 if (form) {
   form.addEventListener('submit', async (e) => {
@@ -164,32 +164,23 @@ if (form) {
       return;
     }
 
-    const data = {
-      name: name.value.trim(),
-      count: count.value.trim(),
-      attend: attend.value,
-      side: sides || 'Չի նշվել'
-    };
+    const formData = new FormData();
+    formData.append('name', name.value.trim());
+    formData.append('count', count.value.trim());
+    formData.append('attend', attend.value);
+    formData.append('side', sides || 'Չի նշվել');
 
-    try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    });
 
-      form.classList.add('is-sent');
+    form.classList.add('is-sent');
 
-      [...form.elements].forEach((el) => {
-        el.disabled = true;
-      });
-
-    } catch (error) {
-      alert('Սխալ տեղի ունեցավ։ Խնդրում ենք փորձել կրկին։');
-    }
+    [...form.elements].forEach((el) => {
+      el.disabled = true;
+    });
   });
 }
 })();
