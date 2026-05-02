@@ -131,7 +131,7 @@
   /* -------------------- RSVP FORM -------------------- */
   const form = document.querySelector('#rsvpForm');
 
-  const GOOGLE_SCRIPT_URL = 'AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA/exec';
 
 if (form) {
   form.addEventListener('submit', async (e) => {
