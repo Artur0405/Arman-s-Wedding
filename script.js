@@ -11,10 +11,31 @@
   const coverCard = $('#coverCard');
   const body      = document.body;
 
+  /* -------------------- BACKGROUND MUSIC --------------------
+     Audio instance is created up-front (preload='auto') so the file is
+     buffered while the user looks at the cover. Playback is started
+     inside openCover() — that runs synchronously inside the click /
+     keydown / scroll user-gesture handlers, which satisfies mobile
+     autoplay policies. Loop + ~50% volume per spec. */
+  const bgm = new Audio('assets/music/music.mp3');
+  bgm.loop = true;
+  bgm.volume = 0.5;
+  bgm.preload = 'auto';
+  // Some mobile browsers respect this hint to keep playback non-disruptive
+  bgm.setAttribute('playsinline', '');
+
   function openCover() {
     if (!cover || cover.classList.contains('is-open')) return;
     cover.classList.add('is-open');
     body.classList.remove('locked');
+    // Start music in lockstep with the zoom animation. .play() returns a
+    // Promise that may reject if no user gesture is in scope (e.g. when
+    // openCover is invoked from the ?open / ?seeall / ?qa dev helpers);
+    // we swallow that rejection so it never throws.
+    if (bgm.paused) {
+      const p = bgm.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    }
   }
 
   if (coverCard) {
