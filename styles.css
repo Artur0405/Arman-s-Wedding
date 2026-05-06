@@ -418,19 +418,23 @@ a { color: inherit; text-decoration: none; }
 /* Smooth elliptical orbit, sampled at 8 evenly-spaced angles around the
    ellipse so linear interpolation between keyframes traces a continuous
    curve with no zigzag and no jump at the loop boundary (0% == 100%).
-   The bounding box (X: -40vw..120vw, Y: -80vh..100vh) is kept very
-   close to the previous animation's reach, so the orbit's overall area
-   and direction look unchanged.                                        */
+
+   Horizontal radius rx = 100vw  → wide, can extend off-screen.
+   Vertical radius   ry = 450px  → constrained to roughly the height of
+                                   the 980px-tall .cd__shape SVG, so the
+                                   moon's top/bottom points land near
+                                   the SVG's top/bottom borders.
+   Direction unchanged (counter-clockwise, starts upper-right).         */
 @keyframes moonWideLoopReverse {
-  0%    { transform: translate3d(97vw,  -54vh, 0); }
-  12.5% { transform: translate3d(40vw,  -80vh, 0); }
-  25%   { transform: translate3d(-17vw, -54vh, 0); }
-  37.5% { transform: translate3d(-40vw,  10vh, 0); }
-  50%   { transform: translate3d(-17vw,  74vh, 0); }
-  62.5% { transform: translate3d(40vw,  100vh, 0); }
-  75%   { transform: translate3d(97vw,   74vh, 0); }
-  87.5% { transform: translate3d(120vw,  10vh, 0); }
-  100%  { transform: translate3d(97vw,  -54vh, 0); }
+  0%    { transform: translate3d( 71vw, -318px, 0); } /* upper-right */
+  12.5% { transform: translate3d(  0vw, -450px, 0); } /* top */
+  25%   { transform: translate3d(-71vw, -318px, 0); } /* upper-left */
+  37.5% { transform: translate3d(-100vw,    0,  0); } /* far left */
+  50%   { transform: translate3d(-71vw,  318px, 0); } /* lower-left */
+  62.5% { transform: translate3d(  0vw,  450px, 0); } /* bottom */
+  75%   { transform: translate3d( 71vw,  318px, 0); } /* lower-right */
+  87.5% { transform: translate3d(100vw,     0,  0); } /* far right */
+  100%  { transform: translate3d( 71vw, -318px, 0); } /* loop = 0% */
 }
 
 /* decorative orbit lines stay perfectly static */
@@ -475,6 +479,13 @@ html.qa-mode .scene--finale { min-height: 980px; }
   cursor: pointer;
   overflow: hidden;
   transform: translateZ(0);
+  /* hints to keep the open animation buttery: tell the browser these
+     four properties + the transform of children will animate, and put
+     the card on its own composite layer so the photo bitmap is not
+     re-rasterised on every reflow.                                    */
+  will-change: top, right, bottom, left;
+  backface-visibility: hidden;
+  contain: layout paint;
   transition:
     top    1.4s var(--ease-soft),
     bottom 1.4s var(--ease-soft),
@@ -487,6 +498,12 @@ html.qa-mode .scene--finale { min-height: 980px; }
   object-fit: cover;
   object-position: center 32%;
   filter: brightness(.95) contrast(1.04);
+  /* promote the heavy WebP bitmap to its own GPU layer; this prevents
+     the photo from being re-painted while the parent .cover__card
+     animates its top/right/bottom/left during the open zoom.          */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: filter, transform;
   transition: filter 1.6s var(--ease-out), transform 1.6s var(--ease-soft);
 }
 .scene--cover.is-open .cover__photo {
