@@ -155,8 +155,19 @@
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-CrNw1YggkOqEbPdML8VBooAkHwOuQbTGND8EaGL9MC19MKjlJdHMh7VrQRnf1POA/exec';
 
 if (form) {
+  // Submit-button state management. Cached once so we don't re-query
+  // the DOM on every submit and we can guard against double-submission.
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const ORIGINAL_LABEL = submitBtn ? submitBtn.textContent : 'Ուղարկել';
+  const SENDING_LABEL  = 'Ուղարկվում է';
+  const SENT_LABEL     = 'Ուղարկված է';
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Hard guard against multiple clicks / re-submits while in flight
+    // or after a successful send.
+    if (submitBtn && submitBtn.disabled) return;
 
     const name = form.querySelector('input[name="name"]');
     const count = form.querySelector('input[name="count"]');
@@ -191,11 +202,32 @@ if (form) {
     formData.append('attend', attend.value);
     formData.append('side', sides || 'Չի նշվել');
 
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: formData
-    });
+    // 1) sending → block button + show "Ուղարկվում է"
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = SENDING_LABEL;
+    }
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+    } catch (err) {
+      // Network failure → re-enable the button so the user can retry.
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = ORIGINAL_LABEL;
+      }
+      return;
+    }
+
+    // 2) sent → keep button disabled + show "Ուղարկված է"
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = SENT_LABEL;
+    }
 
     form.classList.add('is-sent');
 

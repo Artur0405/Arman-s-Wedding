@@ -1357,13 +1357,18 @@ html.qa-mode .scene--finale { min-height: 980px; }
   font-family: var(--serif-display);
   font-style: italic;
   font-size: 22px;
+  /* explicit line-height so the descenders of Armenian letters
+     (ց, գ, յ, etc.) fit inside the box and aren't clipped. */
+  line-height: 1.5;
   color: var(--cream);
   opacity: 0;
   height: 0;
   overflow: hidden;
   transition: opacity .6s var(--ease-out), height .6s var(--ease-out);
 }
-.rsvp__form.is-sent .rsvp__thanks { opacity: 1; height: 28px; }
+/* Open height = ceil(22 * 1.5) = 33px, with a small comfort margin
+   so the bottom of descenders is fully visible. */
+.rsvp__form.is-sent .rsvp__thanks { opacity: 1; height: 38px; }
 
 
 /* ============================================================
@@ -1377,7 +1382,6 @@ html.qa-mode .scene--finale { min-height: 980px; }
   padding: 0;
   height: clamp(1000px, 110vh, 1400px);
   overflow: hidden;
-  background-color: #27009b;
   isolation: isolate;
 }
 
@@ -1441,7 +1445,7 @@ html.qa-mode .scene--finale { min-height: 980px; }
   z-index: 7;
   text-align: center;
   width: 100%;
-  top: 40%;
+  top: 35%;
   left: 0;
   transform: translateY(-50%);
   padding: 0 20px;
